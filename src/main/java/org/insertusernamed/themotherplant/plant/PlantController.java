@@ -2,10 +2,7 @@ package org.insertusernamed.themotherplant.plant;
 
 import org.insertusernamed.themotherplant.plant.dto.PlantResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,5 +26,27 @@ public class PlantController {
 	public ResponseEntity<PlantResponse> getPlantById(@PathVariable Long id) {
 		PlantResponse plant = plantService.findById(id);
 		return ResponseEntity.ok(plant);
+	}
+
+	@PostMapping
+	public ResponseEntity<PlantResponse> createPlant(@RequestBody Plant plant) {
+		PlantResponse createdPlant = plantService.createPlant(plant);
+		return ResponseEntity.status(201).body(createdPlant);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deletePlant(@PathVariable Long id) {
+		plantService.deletePlant(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/{plantId}/tags/{tagId}")
+	public PlantResponse addTagToPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
+	    return plantService.addTagToPlant(plantId, tagId);
+	}
+
+	@DeleteMapping("/{plantId}/tags/{tagId}")
+	public PlantResponse removeTagFromPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
+	    return plantService.removeTagFromPlant(plantId, tagId);
 	}
 }

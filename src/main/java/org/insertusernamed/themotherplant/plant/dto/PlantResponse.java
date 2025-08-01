@@ -1,6 +1,6 @@
 package org.insertusernamed.themotherplant.plant.dto;
 
-import org.insertusernamed.themotherplant.plant.Tag;
+import org.insertusernamed.themotherplant.tag.Tag;
 
 import java.math.BigDecimal;
 import java.util.Set;

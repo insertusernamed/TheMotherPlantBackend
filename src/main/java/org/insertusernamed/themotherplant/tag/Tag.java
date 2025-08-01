@@ -1,4 +1,4 @@
-package org.insertusernamed.themotherplant.plant;
+package org.insertusernamed.themotherplant.tag;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
