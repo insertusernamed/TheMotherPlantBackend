@@ -156,7 +156,7 @@ public class GeminiClient {
 		}
 	}
 
-	public GeminiDescriptionAndPrice descriptionFallback(String plantName, MultipartFile image, Throwable t) {
+	public GeminiDescriptionAndPrice descriptionFallback(String plantName, Throwable t) {
 		System.err.println("Gemini rate limit exceeded! Falling back. Error: " + t.getMessage());
 		return new GeminiDescriptionAndPrice(
 				List.of(String.format(
