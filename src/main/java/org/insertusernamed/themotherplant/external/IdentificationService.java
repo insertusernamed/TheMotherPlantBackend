@@ -1,6 +1,7 @@
 package org.insertusernamed.themotherplant.external;
 
 import lombok.RequiredArgsConstructor;
+import org.insertusernamed.themotherplant.external.dto.GeminiDescriptionAndPrice;
 import org.insertusernamed.themotherplant.external.dto.PlantNetResponse;
 import org.insertusernamed.themotherplant.external.dto.PlantNetUploadResponse;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.io.IOException;
 public class IdentificationService {
 
 	private final PlantNetClient plantNetClient;
+	private final GeminiClient geminiClient;
 
 	public PlantNetResponse identifyPlantFromImage(MultipartFile file, String organ) throws IOException {
 		PlantNetUploadResponse uploadResponse = plantNetClient.uploadImage(file);
@@ -23,5 +25,9 @@ public class IdentificationService {
 		}
 
 		return plantNetClient.identifyPlant(imageId, organ);
+	}
+
+	public GeminiDescriptionAndPrice getGeminiPlantDescription(MultipartFile file, String commonName) throws IOException {
+		return geminiClient.generateDescription(commonName, file);
 	}
 }

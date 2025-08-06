@@ -1,6 +1,7 @@
 package org.insertusernamed.themotherplant.external;
 
 import lombok.RequiredArgsConstructor;
+import org.insertusernamed.themotherplant.external.dto.GeminiDescriptionAndPrice;
 import org.insertusernamed.themotherplant.external.dto.PlantNetResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,4 +25,14 @@ public class IdentificationController {
 		PlantNetResponse response = identificationService.identifyPlantFromImage(file, organ);
 		return ResponseEntity.ok(response);
 	}
+
+	@PostMapping("/description")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<GeminiDescriptionAndPrice> getGeminiPlantDescription(
+			@RequestPart("file") MultipartFile file,
+			@RequestParam("commonName") String commonName) throws IOException {
+		GeminiDescriptionAndPrice plantInfo = identificationService.getGeminiPlantDescription(file, commonName);
+		return ResponseEntity.ok(plantInfo);
+	}
+
 }

@@ -38,6 +38,6 @@ public class AuthService {
 				.orElseThrow(() -> new IllegalStateException("User not found"));
 
 		String jwtToken = jwtService.generateToken(user);
-		return new AuthResponse(jwtToken);
+		return new AuthResponse(jwtToken, user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPoints(), user.getRole());
 	}
 }
