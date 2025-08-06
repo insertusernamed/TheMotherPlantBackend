@@ -27,7 +27,7 @@ public class IdentificationService {
 		return plantNetClient.identifyPlant(imageId, organ);
 	}
 
-	public GeminiDescriptionAndPrice getGeminiPlantDescription(MultipartFile file, String commonName) throws IOException {
-		return geminiClient.generateDescription(commonName, file);
+	public GeminiDescriptionAndPrice getGeminiPlantDescription(String commonName) throws IOException {
+		return geminiClient.generateDescriptionTextOnly(commonName);
 	}
 }

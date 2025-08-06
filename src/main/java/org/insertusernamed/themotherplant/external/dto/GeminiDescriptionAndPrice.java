@@ -8,5 +8,5 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record GeminiDescriptionAndPrice(
 		List<String> descriptions,
-		Map<String, BigDecimal> priceSuggestionsCAD
+		Map<String, BigDecimal> priceSuggestions
 ) {}

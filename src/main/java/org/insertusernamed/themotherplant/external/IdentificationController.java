@@ -29,10 +29,8 @@ public class IdentificationController {
 	@PostMapping("/description")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<GeminiDescriptionAndPrice> getGeminiPlantDescription(
-			@RequestPart("file") MultipartFile file,
 			@RequestParam("commonName") String commonName) throws IOException {
-		GeminiDescriptionAndPrice plantInfo = identificationService.getGeminiPlantDescription(file, commonName);
+		GeminiDescriptionAndPrice plantInfo = identificationService.getGeminiPlantDescription(commonName);
 		return ResponseEntity.ok(plantInfo);
 	}
-
 }
