@@ -1,7 +1,7 @@
 package org.insertusernamed.themotherplant.external;
 
 import lombok.RequiredArgsConstructor;
-import org.insertusernamed.themotherplant.external.dto.GeminiDescriptionAndPrice;
+import org.insertusernamed.themotherplant.external.dto.GeminiStructuredResponse;
 import org.insertusernamed.themotherplant.external.dto.PlantNetResponse;
 import org.insertusernamed.themotherplant.external.dto.PlantNetUploadResponse;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class IdentificationService {
 		return plantNetClient.identifyPlant(imageId, organ);
 	}
 
-	public GeminiDescriptionAndPrice getGeminiPlantDescription(String commonName) throws IOException {
+	public GeminiStructuredResponse getGeminiPlantDescription(String commonName) throws IOException {
 		return geminiClient.generateDescriptionTextOnly(commonName);
 	}
 }

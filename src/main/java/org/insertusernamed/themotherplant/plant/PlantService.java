@@ -47,37 +47,36 @@ public class PlantService {
 	}
 
 	public PlantResponse addTagToPlant(Long plantId, Long tagId) {
-	    Plant plant = plantRepository.findById(plantId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + plantId));
-	    Tag tag = tagRepository.findById(tagId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Tag not found with id: " + tagId));
+		Plant plant = plantRepository.findById(plantId)
+				.orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + plantId));
+		Tag tag = tagRepository.findById(tagId)
+				.orElseThrow(() -> new ResourceNotFoundException("Tag not found with id: " + tagId));
 
 		if (plant.getTags().stream().anyMatch(t -> t.getId().equals(tagId))) {
 			throw new IllegalArgumentException("Tag with id " + tagId + " is already associated with plant with id " + plantId);
 		}
 
-	    plant.getTags().add(tag);
-	    Plant savedPlant = plantRepository.save(plant);
-	    return convertToResponse(savedPlant);
+		plant.getTags().add(tag);
+		Plant savedPlant = plantRepository.save(plant);
+		return convertToResponse(savedPlant);
 	}
 
 	public PlantResponse removeTagFromPlant(Long plantId, Long tagId) {
-	    Plant plant = plantRepository.findById(plantId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + plantId));
+		Plant plant = plantRepository.findById(plantId)
+				.orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + plantId));
 
-		if(plant.getTags().stream().noneMatch(t -> t.getId().equals(tagId))) {
+		if (plant.getTags().stream().noneMatch(t -> t.getId().equals(tagId))) {
 			throw new ResourceNotFoundException("Tag with id " + tagId + " is not associated with plant with id " + plantId);
 		}
 
-	    plant.getTags().removeIf(tag -> tag.getId().equals(tagId));
-	    Plant savedPlant = plantRepository.save(plant);
-	    return convertToResponse(savedPlant);
+		plant.getTags().removeIf(tag -> tag.getId().equals(tagId));
+		Plant savedPlant = plantRepository.save(plant);
+		return convertToResponse(savedPlant);
 	}
 
 	private PlantResponse convertToResponse(Plant plant) {
 		return new PlantResponse(
 				plant.getId(),
-				plant.getScientificName(),
 				plant.getCommonName(),
 				plant.getDescription(),
 				plant.getImageUrl(),

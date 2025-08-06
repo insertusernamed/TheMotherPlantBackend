@@ -20,7 +20,6 @@ public class Plant {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String scientificName;
 	private String commonName;
 
 	@Column(columnDefinition = "TEXT")
@@ -31,9 +30,9 @@ public class Plant {
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
-		name = "plant_tags",
-		joinColumns = @JoinColumn(name = "plant_id"),
-		inverseJoinColumns = @JoinColumn(name = "tag_id")
+			name = "plant_tags",
+			joinColumns = @JoinColumn(name = "plant_id"),
+			inverseJoinColumns = @JoinColumn(name = "tag_id")
 	)
 	private Set<Tag> tags;
 }

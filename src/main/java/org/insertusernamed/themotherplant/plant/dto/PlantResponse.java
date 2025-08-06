@@ -5,12 +5,12 @@ import org.insertusernamed.themotherplant.tag.Tag;
 import java.math.BigDecimal;
 import java.util.Set;
 
-public record PlantResponse (
-	Long id,
-	String scientificName,
-	String commonName,
-	String description,
-	String imageUrl,
-	BigDecimal price,
-	Set<Tag> tags
-) {}
+public record PlantResponse(
+		Long id,
+		String commonName,
+		String description,
+		String imageUrl,
+		BigDecimal price,
+		Set<Tag> tags
+) {
+}

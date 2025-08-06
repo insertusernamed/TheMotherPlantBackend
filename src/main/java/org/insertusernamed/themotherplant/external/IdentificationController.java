@@ -1,7 +1,7 @@
 package org.insertusernamed.themotherplant.external;
 
 import lombok.RequiredArgsConstructor;
-import org.insertusernamed.themotherplant.external.dto.GeminiDescriptionAndPrice;
+import org.insertusernamed.themotherplant.external.dto.GeminiStructuredResponse;
 import org.insertusernamed.themotherplant.external.dto.PlantNetResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,9 +28,9 @@ public class IdentificationController {
 
 	@PostMapping("/description")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<GeminiDescriptionAndPrice> getGeminiPlantDescription(
+	public ResponseEntity<GeminiStructuredResponse> getGeminiPlantDescription(
 			@RequestParam("commonName") String commonName) throws IOException {
-		GeminiDescriptionAndPrice plantInfo = identificationService.getGeminiPlantDescription(commonName);
+		GeminiStructuredResponse plantInfo = identificationService.getGeminiPlantDescription(commonName);
 		return ResponseEntity.ok(plantInfo);
 	}
 }

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import org.insertusernamed.themotherplant.external.dto.GeminiDescriptionAndPrice;
+import org.insertusernamed.themotherplant.external.dto.GeminiStructuredResponse;
+import org.insertusernamed.themotherplant.tag.TagService;
+import org.insertusernamed.themotherplant.tag.dto.TagResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,16 +14,17 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GeminiClient {
 
 	private final ObjectMapper objectMapper;
 	private final RestTemplate restTemplate;
+	private final TagService tagService;
 	private final String apiKey;
 	private final String promptTemplate;
 	private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
@@ -29,24 +32,29 @@ public class GeminiClient {
 	public GeminiClient(
 			ObjectMapper objectMapper,
 			RestTemplate restTemplate,
+			TagService tagService,
 			@Value("${google.gemini.api.key}") String apiKey,
 			@Value("${google.gemini.api.prompt.template}") String promptTemplate
 	) {
 		this.objectMapper = objectMapper;
 		this.restTemplate = restTemplate;
+		this.tagService = tagService;
 		this.apiKey = apiKey;
 		this.promptTemplate = promptTemplate;
 	}
 
-	@RateLimiter(name = "gemini-api-daily", fallbackMethod = "descriptionFallback")
-	public GeminiDescriptionAndPrice generateDescriptionTextOnly(String plantName) throws IOException {
-		String prompt = String.format(promptTemplate, plantName);
+	@RateLimiter(name = "gemini-api-daily")
+	public GeminiStructuredResponse generateDescriptionTextOnly(String plantName) throws IOException {
+		String tagListString = tagService.getAllTags().stream()
+				.map(TagResponse::name)
+				.collect(Collectors.joining(", "));
+		String prompt = String.format(promptTemplate, plantName, tagListString);
 
 		String requestBody = buildTextOnlyRequestBody(prompt);
 		return getGeminiDescriptionAndPrice(requestBody);
 	}
 
-	private GeminiDescriptionAndPrice getGeminiDescriptionAndPrice(String requestBody) {
+	private GeminiStructuredResponse getGeminiDescriptionAndPrice(String requestBody) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
@@ -68,7 +76,7 @@ public class GeminiClient {
 	}
 
 	// This method i wont delete yet because i might use it later
-	public GeminiDescriptionAndPrice generateDescriptionWithImage(String plantName, MultipartFile image) throws IOException {
+	public GeminiStructuredResponse generateDescriptionWithImage(String plantName, MultipartFile image) throws IOException {
 		String prompt = String.format(promptTemplate, plantName);
 
 		String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
@@ -122,7 +130,7 @@ public class GeminiClient {
 		return objectMapper.writeValueAsString(requestPayload);
 	}
 
-	private GeminiDescriptionAndPrice parseResponse(String responseBody) throws JsonProcessingException {
+	private GeminiStructuredResponse parseResponse(String responseBody) throws JsonProcessingException {
 		JsonNode rootNode = objectMapper.readTree(responseBody);
 
 		JsonNode candidatesNode = rootNode.get("candidates");
@@ -149,21 +157,10 @@ public class GeminiClient {
 					.replace("```", "")
 					.trim();
 
-			return objectMapper.readValue(cleanedJson, GeminiDescriptionAndPrice.class);
+			return objectMapper.readValue(cleanedJson, GeminiStructuredResponse.class);
 		} catch (JsonProcessingException e) {
 			System.err.println("Failed to parse JSON from Gemini: " + textResponse);
 			throw new RuntimeException("Failed to parse response from Gemini.", e);
 		}
-	}
-
-	public GeminiDescriptionAndPrice descriptionFallback(String plantName, Throwable t) {
-		System.err.println("Gemini rate limit exceeded! Falling back. Error: " + t.getMessage());
-		return new GeminiDescriptionAndPrice(
-				List.of(String.format(
-						"This beautiful %s is a wonderful addition to any home. (Description generation is currently busy, please try again shortly.)",
-						plantName
-				)),
-				Map.of("low", BigDecimal.valueOf(9.99), "mid", BigDecimal.valueOf(14.99), "high", BigDecimal.valueOf(19.99))
-		);
 	}
 }
