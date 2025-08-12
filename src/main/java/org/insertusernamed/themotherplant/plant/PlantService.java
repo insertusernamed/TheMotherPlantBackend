@@ -1,12 +1,19 @@
 package org.insertusernamed.themotherplant.plant;
 
 import org.insertusernamed.themotherplant.exception.ResourceNotFoundException;
+import org.insertusernamed.themotherplant.external.CloudflareR2Client;
+import org.insertusernamed.themotherplant.plant.dto.CreatePlantRequest;
 import org.insertusernamed.themotherplant.plant.dto.PlantResponse;
 import org.insertusernamed.themotherplant.tag.Tag;
 import org.insertusernamed.themotherplant.tag.TagRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -14,8 +21,10 @@ public class PlantService {
 
 	private final PlantRepository plantRepository;
 	private final TagRepository tagRepository;
+	private final CloudflareR2Client cloudflareR2Client;
 
-	public PlantService(PlantRepository plantRepository, TagRepository tagRepository) {
+	public PlantService(PlantRepository plantRepository, TagRepository tagRepository, CloudflareR2Client cloudflareR2Client) {
+		this.cloudflareR2Client = cloudflareR2Client;
 		this.plantRepository = plantRepository;
 		this.tagRepository = tagRepository;
 	}
@@ -33,9 +42,33 @@ public class PlantService {
 		return convertToResponse(plant);
 	}
 
-	public PlantResponse createPlant(Plant plant) {
-		Plant savedPlant = plantRepository.save(plant);
-		return convertToResponse(savedPlant);
+	public List<Plant> createPlants(List<CreatePlantRequest> plantRequests, List<MultipartFile> files) throws IOException {
+		if (plantRequests.size() != files.size()) {
+			throw new IllegalArgumentException("The number of plant data objects must match the number of files.");
+		}
+
+		List<Plant> savedPlants = new ArrayList<>();
+
+		for (int i = 0; i < plantRequests.size(); i++) {
+			CreatePlantRequest request = plantRequests.get(i);
+			MultipartFile file = files.get(i);
+
+			String imageUrl = cloudflareR2Client.uploadFile(file);
+
+			List<Tag> tags = tagRepository.findByNameIn(request.tags());
+			Set<Tag> tagsAsSet = new HashSet<>(tags);
+
+			Plant newPlant = new Plant();
+			newPlant.setCommonName(request.commonName());
+			newPlant.setDescription(request.description());
+			newPlant.setPrice(request.price());
+			newPlant.setImageUrl(imageUrl);
+			newPlant.setTags(tagsAsSet);
+
+			savedPlants.add(plantRepository.save(newPlant));
+		}
+
+		return savedPlants;
 	}
 
 	public void deletePlant(Long id) {

@@ -1,8 +1,14 @@
 package org.insertusernamed.themotherplant.plant;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.insertusernamed.themotherplant.plant.dto.CreatePlantRequest;
 import org.insertusernamed.themotherplant.plant.dto.PlantResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -11,8 +17,10 @@ import java.util.List;
 public class PlantController {
 
 	private final PlantService plantService;
+	private final ObjectMapper objectMapper;
 
-	public PlantController(PlantService plantService) {
+	public PlantController(PlantService plantService, ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 		this.plantService = plantService;
 	}
 
@@ -29,9 +37,18 @@ public class PlantController {
 	}
 
 	@PostMapping
-	public ResponseEntity<PlantResponse> createPlant(@RequestBody Plant plant) {
-		PlantResponse createdPlant = plantService.createPlant(plant);
-		return ResponseEntity.status(201).body(createdPlant);
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<List<Plant>> createPlants(
+			@RequestPart("plantsJson") String plantsJson,
+			@RequestPart("files") List<MultipartFile> files
+	) throws Exception {
+
+		TypeReference<List<CreatePlantRequest>> typeRef = new TypeReference<>() {
+		};
+		List<CreatePlantRequest> plantRequests = objectMapper.readValue(plantsJson, typeRef);
+
+		List<Plant> createdPlants = plantService.createPlants(plantRequests, files);
+		return ResponseEntity.status(HttpStatus.CREATED).body(createdPlants);
 	}
 
 	@DeleteMapping("/{id}")
@@ -42,11 +59,11 @@ public class PlantController {
 
 	@PostMapping("/{plantId}/tags/{tagId}")
 	public PlantResponse addTagToPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
-	    return plantService.addTagToPlant(plantId, tagId);
+		return plantService.addTagToPlant(plantId, tagId);
 	}
 
 	@DeleteMapping("/{plantId}/tags/{tagId}")
 	public PlantResponse removeTagFromPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
-	    return plantService.removeTagFromPlant(plantId, tagId);
+		return plantService.removeTagFromPlant(plantId, tagId);
 	}
 }
