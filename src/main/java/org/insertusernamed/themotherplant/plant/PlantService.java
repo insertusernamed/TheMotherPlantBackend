@@ -73,9 +73,19 @@ public class PlantService {
 	}
 
 	public void deletePlant(Long id) {
-		if (!plantRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Plant not found with id: " + id);
+		Plant plant = plantRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + id));
+
+		String fileName = cloudflareR2Client.extractFileNameFromUrl(plant.getImageUrl());
+		if (fileName != null) {
+			try {
+				cloudflareR2Client.deleteFile(fileName);
+			} catch (Exception e) {
+				System.err.println("Failed to delete image from R2: " + e.getMessage());
+			}
 		}
+
+		// Delete plant (this will cascade delete tag associations)
 		plantRepository.deleteById(id);
 		System.out.println("Plant with id " + id + " deleted successfully.");
 	}
