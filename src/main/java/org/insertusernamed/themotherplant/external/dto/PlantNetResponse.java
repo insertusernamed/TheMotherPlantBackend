@@ -16,7 +16,7 @@ record PlantNetResult(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 record Species(
-		String scientificName,
+		String genus,
 		List<String> commonNames,
 		String family
 ) {}

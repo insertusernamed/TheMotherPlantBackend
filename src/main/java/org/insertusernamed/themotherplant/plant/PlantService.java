@@ -6,6 +6,7 @@ import org.insertusernamed.themotherplant.plant.dto.CreatePlantRequest;
 import org.insertusernamed.themotherplant.plant.dto.PlantResponse;
 import org.insertusernamed.themotherplant.tag.Tag;
 import org.insertusernamed.themotherplant.tag.TagRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -107,7 +108,15 @@ public class PlantService {
 		return convertToResponse(savedPlant);
 	}
 
-	private PlantResponse convertToResponse(Plant plant) {
+    public List<PlantResponse> getLatestPlants(int count) {
+        List<Plant> plants = plantRepository.findAllByOrderByIdDesc(PageRequest.of(0, count));
+        return plants.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+
+    private PlantResponse convertToResponse(Plant plant) {
 		return new PlantResponse(
 				plant.getId(),
 				plant.getCommonName(),
