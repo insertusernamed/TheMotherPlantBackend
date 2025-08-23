@@ -49,7 +49,8 @@ public class TagService {
 	private TagResponse convertToResponse(Tag tag) {
 		return new TagResponse(
 				tag.getId(),
-				tag.getName()
+				tag.getName(),
+				tag.getDescription()
 		);
 	}
 }
