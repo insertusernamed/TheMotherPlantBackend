@@ -90,6 +90,21 @@ public class PlantService {
 		System.out.println("Plant with id " + id + " deleted successfully.");
 	}
 
+	public void duplicatePlant(Long id) {
+		Plant plant = plantRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + id));
+
+		Plant duplicatedPlant = new Plant();
+		duplicatedPlant.setCommonName(plant.getCommonName());
+		duplicatedPlant.setDescription(plant.getDescription());
+		duplicatedPlant.setImageUrl(plant.getImageUrl());
+		duplicatedPlant.setPrice(plant.getPrice());
+		duplicatedPlant.setTags(new HashSet<>(plant.getTags()));
+
+		plantRepository.save(duplicatedPlant);
+		System.out.println("Plant with id " + id + " duplicated successfully.");
+	}
+
 	public PlantResponse addTagToPlant(Long plantId, Long tagId) {
 		Plant plant = plantRepository.findById(plantId)
 				.orElseThrow(() -> new ResourceNotFoundException("Plant not found with id: " + plantId));
@@ -118,15 +133,15 @@ public class PlantService {
 		return convertToResponse(savedPlant);
 	}
 
-    public List<PlantResponse> getLatestPlants(int count) {
-        List<Plant> plants = plantRepository.findAllByOrderByIdDesc(PageRequest.of(0, count));
-        return plants.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
+	public List<PlantResponse> getLatestPlants(int count) {
+		List<Plant> plants = plantRepository.findAllByOrderByIdDesc(PageRequest.of(0, count));
+		return plants.stream()
+				.map(this::convertToResponse)
+				.collect(Collectors.toList());
+	}
 
 
-    private PlantResponse convertToResponse(Plant plant) {
+	private PlantResponse convertToResponse(Plant plant) {
 		return new PlantResponse(
 				plant.getId(),
 				plant.getCommonName(),

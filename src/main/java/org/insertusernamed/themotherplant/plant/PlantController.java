@@ -36,11 +36,11 @@ public class PlantController {
 		return ResponseEntity.ok(plant);
 	}
 
-    @GetMapping("/latest/{count}")
-    public ResponseEntity<List<PlantResponse>> getLatestPlants(@PathVariable int count) {
-        List<PlantResponse> plants = plantService.getLatestPlants(count);
-        return ResponseEntity.ok(plants);
-    }
+	@GetMapping("/latest/{count}")
+	public ResponseEntity<List<PlantResponse>> getLatestPlants(@PathVariable int count) {
+		List<PlantResponse> plants = plantService.getLatestPlants(count);
+		return ResponseEntity.ok(plants);
+	}
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
@@ -57,21 +57,28 @@ public class PlantController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdPlants);
 	}
 
+	@PostMapping("/{id}/duplicate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> duplicatePlant(@PathVariable Long id) {
+		plantService.duplicatePlant(id);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+
 	@DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> deletePlant(@PathVariable Long id) {
 		plantService.deletePlant(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/{plantId}/tags/{tagId}")
-    @PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	public PlantResponse addTagToPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
 		return plantService.addTagToPlant(plantId, tagId);
 	}
 
 	@DeleteMapping("/{plantId}/tags/{tagId}")
-    @PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	public PlantResponse removeTagFromPlant(@PathVariable Long plantId, @PathVariable Long tagId) {
 		return plantService.removeTagFromPlant(plantId, tagId);
 	}
